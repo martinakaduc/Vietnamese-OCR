@@ -60,7 +60,7 @@ class VizCallback(keras.callbacks.Callback):
             # label
             labels = word_batch['the_labels'][:num_proc].astype(np.int32)
             labels = [labels_to_text(label) for label in labels]
-            
+
             for j in range(num_proc):
                 edit_dist = editdistance.eval(decoded_res[j], labels[j])
                 mean_ed += float(edit_dist)
@@ -78,7 +78,7 @@ class VizCallback(keras.callbacks.Callback):
         inputs = batch['the_inputs'][:self.num_display_words]
         labels = batch['the_labels'][:self.num_display_words].astype(np.int32)
         labels = [labels_to_text(label) for label in labels]
-         
+
         pred = self.y_func([inputs])[0]
         pred_texts = decode_batch(pred)
         for i in range(min(self.num_display_words, len(inputs))):
@@ -115,7 +115,7 @@ class TextImageGenerator:
             img = image.img_to_array(img)
             img = preprocess_input(img).astype(np.float16)
             self.imgs[i] = img
-            if self.labels != None: 
+            if self.labels != None:
                 self.texts.append(self.labels[img_file])
             else:
                 #valid mode
@@ -139,7 +139,7 @@ class TextImageGenerator:
             for i in range(self.batch_size):
                 img, text = self.next_sample()
                 img = img.transpose((1, 0, 2))
-                
+
                 X_data[i] = img
                 Y_data[i,:len(text)] = text_to_labels(text)
                 label_length[i] = len(text)

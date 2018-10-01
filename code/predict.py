@@ -3,7 +3,7 @@ import tensorflow as tf
 from crnn import get_model
 from loader import SIZE, MAX_LEN, TextImageGenerator, decode_batch
 from keras import backend as K
-import glob                                                                 
+import glob
 import argparse
 
 
@@ -22,7 +22,7 @@ def predict(model, datapath):
     test_generator.build_data()
 
     for weight_path in models:
-        
+
         print('load {}'.format(weight_path))
         model = loadmodel(weight_path)
         X_test = test_generator.imgs.transpose((0, 2, 1, 3))
@@ -35,11 +35,10 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default='../data/ocr/model/', type=str)
     parser.add_argument('--data', default='../data/ocr/preprocess/test/', type=str)
-    parser.add_argument('--device', default=2, type=int)
+    # parser.add_argument('--device', default=2, type=int)
     args = parser.parse_args()
+
     
-    
-    os.environ["CUDA_VISIBLE_DEVICES"]=str(args.device)
+    # os.environ["CUDA_VISIBLE_DEVICES"]=str(args.device)
 
     predict(args.model, args.data)
-

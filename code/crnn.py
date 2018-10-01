@@ -22,12 +22,12 @@ def get_model(input_shape, training, finetune):
     base_model = applications.VGG16(weights='imagenet', include_top=False)
     inner = base_model(inputs)
     inner = Reshape(target_shape=(int(inner.shape[1]), -1), name='reshape')(inner)
-    inner = Dense(512, activation='relu', kernel_initializer='he_normal', name='dense1')(inner) 
-    inner = Dropout(0.25)(inner) 
-    lstm = Bidirectional(LSTM(512, return_sequences=True, kernel_initializer='he_normal', name='lstm1', dropout=0.25, recurrent_dropout=0.25))(inner) 
+    inner = Dense(512, activation='relu', kernel_initializer='he_normal', name='dense1')(inner)
+    inner = Dropout(0.25)(inner)
+    lstm = Bidirectional(LSTM(512, return_sequences=True, kernel_initializer='he_normal', name='lstm1', dropout=0.25, recurrent_dropout=0.25))(inner)
 
     y_pred = Dense(CHAR_DICT, activation='softmax', kernel_initializer='he_normal',name='dense2')(lstm)
-    
+
     labels = Input(name='the_labels', shape=[MAX_LEN], dtype='float32')
     input_length = Input(name='input_length', shape=[1], dtype='int64')
     label_length = Input(name='label_length', shape=[1], dtype='int64')
@@ -36,9 +36,9 @@ def get_model(input_shape, training, finetune):
 
     for layer in base_model.layers:
         layer.trainable = finetune
-    
+
     y_func = K.function([inputs], [y_pred])
-    
+
     if training:
         Model(inputs=[inputs, labels, input_length, label_length], outputs=loss_out).summary()
         return Model(inputs=[inputs, labels, input_length, label_length], outputs=loss_out), y_func
@@ -61,7 +61,7 @@ def train_kfold(idx, kfold, datapath, labelpath,  epochs, batch_size, lr, finetu
     valid_generator.build_data()
 
     ## callbacks
-    weight_path = 'model/best_%d.h5' % idx
+    weight_path = '../data/ocr/model/best_%d.h5' % idx
     ckp = ModelCheckpoint(weight_path, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=True)
     vis = VizCallback(sess, y_func, valid_generator, len(valid_idx))
     earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=0, mode='min')
@@ -76,7 +76,7 @@ def train_kfold(idx, kfold, datapath, labelpath,  epochs, batch_size, lr, finetu
                     callbacks=[ckp, vis, earlystop],
                     validation_data=valid_generator.next_batch(),
                     validation_steps=int(len(valid_idx) / batch_size))
-    
+
 def train(datapath, labelpath, epochs, batch_size, lr, finetune=False):
     nsplits = 5
 
@@ -93,12 +93,11 @@ if __name__=='__main__':
 
     parser.add_argument("--epochs", default=100, type=int)
     parser.add_argument('--batch_size', default=3, type=int)
-    parser.add_argument('--device', default=1, type=int)
+    # parser.add_argument('--device', default=1, type=int)
     parser.add_argument('--finetune', default=0, type=int)
     parser.add_argument('--lr', default=0.001, type=float)
     args = parser.parse_args()
 
-    os.environ["CUDA_VISIBLE_DEVICES"]=str(args.device)
+    # os.environ["CUDA_VISIBLE_DEVICES"]=str(args.device)
 
     train(args.train, args.label, args.epochs, args.batch_size, args.lr, args.finetune)
-    
